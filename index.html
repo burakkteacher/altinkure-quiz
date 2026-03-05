@@ -1,46 +1,143 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Altınküre Vocabulary Quiz</title>
-
 <style>
-body{font-family: Arial, sans-serif;background:#f4f6f8;margin:0;}
-header{background:#1f3a5f;color:white;padding:15px;display:flex;align-items:center;gap:15px;}
-header img{height:50px;}
-header h1{font-size:18px;margin:0;}
-.container{display:grid;grid-template-columns:320px 1fr;gap:20px;padding:20px;}
-.card{background:white;padding:15px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin-bottom:15px;}
-.card h3{margin-top:0;}
-button{background:#1f3a5f;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;margin-top:5px;}
-button:hover{background:#2d5285;}
-textarea{width:100%;height:120px;}
-#quizOutput{background:white;padding:20px;border-radius:8px;}
-.quizPage{page-break-after:always;margin-bottom:30px;}
-.quizHeader{border-bottom:2px solid #000;margin-bottom:15px;padding-bottom:10px;line-height:1.35;}
-.question{margin:10px 0;}
-.studentItem{margin-bottom:6px;}
-.unitList{max-height:120px;overflow:auto;border:1px solid #ddd;padding:5px;border-radius:6px;}
-.small{font-size:12px;color:#666;}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
-@media print{
-  body{background:white;}
-  .container{display:block;}
-  .card{display:none;}
-  header{display:none;}
+:root{
+  --bg:#f4f6f8;--text:#0f172a;--muted:#64748b;
+  --brand:#1f3a5f;--brand2:#2d5285;--line:#e5e7eb;
+  --shadow:0 10px 30px rgba(2,8,23,.08);--radius:14px;
 }
+*{box-sizing:border-box;}
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 15% 0%, rgba(31,58,95,.10), transparent 60%),
+    radial-gradient(900px 500px at 85% 10%, rgba(45,82,133,.10), transparent 55%),
+    var(--bg);
+  margin:0;color:var(--text);
+}
+header{
+  background: linear-gradient(135deg, var(--brand), #152a46 60%, #0f243d);
+  color:#fff;padding:14px 18px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:10;box-shadow:0 8px 24px rgba(15,23,42,.18);
+}
+header img{height:44px;filter: drop-shadow(0 6px 10px rgba(0,0,0,.22));}
+header .titleWrap{display:flex;flex-direction:column;gap:2px;}
+header h1{font-size:16px;margin:0;letter-spacing:.3px;}
+header .sub{font-size:12px;opacity:.9;}
+
+.container{display:grid;grid-template-columns:360px 1fr;gap:18px;padding:18px;align-items:start;}
+.card{
+  background: rgba(255,255,255,.92);backdrop-filter: blur(8px);
+  border:1px solid rgba(226,232,240,.9);
+  padding:14px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;
+}
+.card h3{margin:0 0 10px 0;font-size:14px;letter-spacing:.2px;}
+.small{font-size:12px;color:var(--muted);}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+select,textarea,input[type="text"]{
+  width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;outline:none;transition:.15s ease;font-size:14px;
+}
+select:focus,textarea:focus,input[type="text"]:focus{
+  border-color: rgba(45,82,133,.55);
+  box-shadow: 0 0 0 4px rgba(45,82,133,.12);
+}
+textarea{height:120px;resize:vertical;}
+
+.btn{
+  background: linear-gradient(180deg, var(--brand2), var(--brand));
+  color:#fff;border:none;padding:10px 14px;border-radius:12px;cursor:pointer;
+  font-weight:600;letter-spacing:.15px;box-shadow: 0 10px 18px rgba(31,58,95,.20);
+}
+.btn:hover{filter:brightness(1.03);}
+.btn.secondary{background:#fff;color:var(--brand);border:1px solid rgba(31,58,95,.25);box-shadow:none;}
+.btn.secondary:hover{background:rgba(31,58,95,.06);}
+
+#quizOutput{
+  background: rgba(255,255,255,.92);
+  border:1px solid rgba(226,232,240,.9);
+  padding:18px;border-radius:var(--radius);box-shadow:var(--shadow);
+  min-height:280px;
+}
+
+/* Dropdown students */
+.dropdown{position:relative;}
+.dropdownBtn{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;font-size:14px;
+}
+.caret{opacity:.7;}
+.dropdownMenu{
+  position:absolute;top:calc(100% + 8px);left:0;right:0;
+  background:#fff;border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 18px 40px rgba(2,8,23,.14);
+  padding:10px;display:none;z-index:20;
+}
+.dropdownMenu.open{display:block;}
+.menuTop{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+.menuTop .btn{padding:8px 10px;border-radius:10px;font-size:12px;}
+.studentList{max-height:320px;overflow:auto;padding-right:4px;}
+.studentItem{padding:8px;border-radius:10px;}
+.studentItem:hover{background:rgba(31,58,95,.06);}
+.studentItem label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;}
+.studentItem input{transform:translateY(2px);}
+hr.sep{border:none;border-top:1px solid var(--line);margin:12px 0;}
+
+/* Units list */
+.unitList{max-height:140px;overflow:auto;border:1px solid var(--line);padding:8px;border-radius:12px;background:#fff;}
+
+/* Quiz */
+.quizPage{page-break-after:always;margin-bottom:26px;}
+.quizHeader{
+  border-bottom:2px solid #0b1220;padding-bottom:10px;margin-bottom:12px;line-height:1.35;
+}
+.quizHeader .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.quizHeader .meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;}
+.questions{margin-top:8px;}
+.question{margin:8px 0;font-size:14px;break-inside:avoid;page-break-inside:avoid;}
+.questionLine{display:flex;gap:10px;align-items:baseline;}
+.qNo{min-width:28px;font-weight:700;}
+.qText{flex:1;}
+.blank{display:inline-block;border-bottom:1.8px solid #0b1220;width:260px;transform:translateY(-2px);}
+
+/* Two columns when many questions */
+.questions.twoCol{column-count:2;column-gap:44px;}
+.questions.twoCol .question{break-inside:avoid;}
+
+/* Print */
+@media print{
+  body{background:#fff;}
+  header{position:static;box-shadow:none;}
+  .container{display:block;padding:0;}
+  .card{display:none;}
+  #quizOutput{box-shadow:none;border:none;padding:0;}
+  .quizPage{margin:0;padding:0 12mm;}
+  .blank{width:240px;}
+}
+
+/* Mobile */
+@media (max-width:980px){.container{grid-template-columns:1fr;padding:14px;}}
 </style>
 </head>
 
 <body>
 <header>
   <img src="logo.png" alt="logo">
-  <h1>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</h1>
+  <div class="titleWrap">
+    <h1>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</h1>
+    <div class="sub">Vocabulary Quiz Panel</div>
+  </div>
 </header>
 
 <div class="container">
   <div>
+
     <div class="card">
       <h3>Sınıf</h3>
       <select id="grade">
@@ -49,25 +146,43 @@ textarea{width:100%;height:120px;}
         <option value="7">7</option>
         <option value="8">8</option>
       </select>
-      <div class="small" style="margin-top:6px;">Öğrenciler students.json içinden yüklenir.</div>
+      <div class="small" style="margin-top:8px;">Öğrenciler students.json içinden yüklenir.</div>
     </div>
 
     <div class="card">
       <h3>Öğrenciler</h3>
-      <div class="row" style="margin-bottom:8px;">
-        <button type="button" onclick="selectAllStudents(true)">Hepsini seç</button>
-        <button type="button" onclick="selectAllStudents(false)">Seçimi temizle</button>
+      <div class="dropdown">
+        <div class="dropdownBtn" id="studentDropdownBtn">
+          <span id="studentDropdownLabel">Öğrenci seç (0)</span>
+          <span class="caret">▾</span>
+        </div>
+
+        <div class="dropdownMenu" id="studentDropdownMenu">
+          <div class="menuTop">
+            <input type="text" id="studentSearch" placeholder="Ara...">
+          </div>
+          <div class="menuTop">
+            <button class="btn secondary" type="button" onclick="selectAllStudents(true)">Hepsini seç</button>
+            <button class="btn secondary" type="button" onclick="selectAllStudents(false)">Seçimi temizle</button>
+            <button class="btn" type="button" onclick="closeStudentMenu()">Kapat</button>
+          </div>
+          <hr class="sep">
+          <div class="studentList" id="studentList"></div>
+        </div>
       </div>
-      <div id="studentList"></div>
+      <div class="small" style="margin-top:8px;">Seçilen öğrenci sayısı: <b id="selCount">0</b></div>
     </div>
 
     <div class="card">
       <h3>Level</h3>
-      <label><input type="checkbox" value="Pre-A1" class="level"> Pre-A1</label><br>
-      <label><input type="checkbox" value="A1" class="level"> A1</label><br>
-      <label><input type="checkbox" value="A2" class="level"> A2</label><br>
-      <label><input type="checkbox" value="B1" class="level"> B1</label><br>
-      <label><input type="checkbox" value="B2" class="level"> B2</label>
+      <div class="row" style="gap:12px;">
+        <label><input type="checkbox" value="Pre-A1" class="level"> Pre-A1</label>
+        <label><input type="checkbox" value="A1" class="level"> A1</label>
+        <label><input type="checkbox" value="A2" class="level"> A2</label>
+        <label><input type="checkbox" value="B1" class="level"> B1</label>
+        <label><input type="checkbox" value="B2" class="level"> B2</label>
+      </div>
+      <div class="small" style="margin-top:8px;">Oxford 3000 için unit: <b>Oxford3000</b></div>
     </div>
 
     <div class="card">
@@ -77,14 +192,15 @@ textarea{width:100%;height:120px;}
 
     <div class="card">
       <h3>Manuel Kelime</h3>
-      <div class="small">Excel’den TAB ile yapıştır: <b>EN[TAB]TR</b></div>
+      <div class="small">Excel’den TAB ile: <b>EN[TAB]TR</b></div>
       <textarea id="manualWords" placeholder="apple	elma"></textarea>
     </div>
 
     <div class="card">
       <h3>Quiz Ayarı</h3>
       <div class="row">
-        <label>Soru Sayısı:
+        <label style="flex:1;">
+          Soru Sayısı
           <select id="questionCount">
             <option value="10">10</option>
             <option value="15">15</option>
@@ -93,23 +209,23 @@ textarea{width:100%;height:120px;}
           </select>
         </label>
       </div>
-
-      <div style="margin-top:8px;">
+      <div style="margin-top:10px;">
         <label><input type="checkbox" id="preventRepeat" checked> Öğrenci için tekrar etmesin</label>
       </div>
 
-      <div class="row" style="margin-top:10px;">
-        <button type="button" onclick="createQuiz()">QUIZ OLUŞTUR</button>
-        <button type="button" onclick="window.print()">YAZDIR</button>
+      <div class="row" style="margin-top:12px;">
+        <button class="btn" type="button" onclick="createQuiz()">QUIZ OLUŞTUR</button>
+        <button class="btn secondary" type="button" onclick="window.print()">YAZDIR</button>
       </div>
 
-      <div class="small" style="margin-top:10px;">
-        Not: words.json yoksa sadece manuel kelimelerle quiz üretir.
-      </div>
+      <div class="small" style="margin-top:10px;">Not: words.json yoksa sadece manuel kelimelerle quiz üretir.</div>
     </div>
+
   </div>
 
-  <div id="quizOutput"></div>
+  <div id="quizOutput">
+    <div class="small">Sağ tarafta quiz çıktısı burada görünecek.</div>
+  </div>
 </div>
 
 <script>
@@ -128,12 +244,9 @@ fetch("students.json")
 fetch("words.json")
   .then(r => r.json())
   .then(data => { words = Array.isArray(data) ? data : (data.words || []); loadUnits(); })
-  .catch(()=>{ console.log("words.json yok"); });
+  .catch(()=>{ console.log("words.json yok"); loadUnits(); });
 
 function normalizeStudentsFromJson(raw){
-  // Supports two formats:
-  // 1) Array of {Sube, Adi, Numara?}
-  // 2) Object {classes: {"7-B":[{numara,name}, ...]}, grades:{...}}
   const result = [];
   if(!raw) return result;
 
@@ -171,10 +284,10 @@ function loadStudents(){
 
   if(all.length === 0){
     list.innerHTML = "<div style='color:#b00020;'>Bu sınıfta öğrenci bulunamadı. students.json formatını kontrol et.</div>";
+    updateSelectedCount();
     return;
   }
 
-  // Sort by class then numara then name
   all.sort((a,b)=>{
     if(a.classKey !== b.classKey) return a.classKey.localeCompare(b.classKey, "tr");
     const na = parseInt(a.numara || "0", 10), nb = parseInt(b.numara || "0", 10);
@@ -185,23 +298,42 @@ function loadStudents(){
   all.forEach(s => {
     const div = document.createElement("div");
     div.className = "studentItem";
-
     const studentId = `${s.classKey}::${s.numara || s.name}`;
     div.innerHTML = `
       <label>
-        <input type="checkbox" data-student-id="${escapeHtml(studentId)}" data-student-class="${escapeHtml(s.classKey)}" data-student-num="${escapeHtml(s.numara||"")}" value="${escapeHtml(s.name)}">
-        <b>${escapeHtml(s.name)}</b>
-        <span class="small">(${escapeHtml(s.classKey)}${s.numara ? " • No: "+escapeHtml(s.numara) : ""})</span>
+        <input type="checkbox"
+          data-student-id="${escapeHtml(studentId)}"
+          data-student-class="${escapeHtml(s.classKey)}"
+          data-student-num="${escapeHtml(s.numara||"")}"
+          value="${escapeHtml(s.name)}"
+          onchange="updateSelectedCount()">
+        <div>
+          <div><b>${escapeHtml(s.name)}</b></div>
+          <div class="small">${escapeHtml(s.classKey)}${s.numara ? " • No: "+escapeHtml(s.numara) : ""}</div>
+        </div>
       </label>
     `;
     list.appendChild(div);
   });
+
+  updateSelectedCount();
+  applyStudentSearch();
 }
 
-document.getElementById("grade").addEventListener("change", loadStudents);
+document.getElementById("grade").addEventListener("change", () => {
+  document.getElementById("studentSearch").value = "";
+  loadStudents();
+});
+
+function updateSelectedCount(){
+  const n = document.querySelectorAll("#studentList input:checked").length;
+  document.getElementById("selCount").textContent = String(n);
+  document.getElementById("studentDropdownLabel").textContent = `Öğrenci seç (${n})`;
+}
 
 function selectAllStudents(flag){
   document.querySelectorAll("#studentList input[type=checkbox]").forEach(cb => cb.checked = !!flag);
+  updateSelectedCount();
 }
 
 function loadUnits(){
@@ -218,9 +350,7 @@ function loadUnits(){
 
   Array.from(unitSet).sort((a,b)=>String(a).localeCompare(String(b),"tr")).forEach(u => {
     const div = document.createElement("div");
-    div.innerHTML = `
-      <label><input type="checkbox" value="${escapeHtml(u)}" class="unit"> ${escapeHtml(u)}</label>
-    `;
+    div.innerHTML = `<label><input type="checkbox" value="${escapeHtml(u)}" class="unit"> ${escapeHtml(u)}</label>`;
     container.appendChild(div);
   });
 }
@@ -231,7 +361,6 @@ function getWordPool(){
   const units  = [...document.querySelectorAll(".unit:checked")].map(x=>x.value);
 
   let pool = words.filter(w => {
-    // grade can be number or string in words.json
     if(w.grade != null && String(w.grade) !== String(grade)) return false;
     if(levels.length && !levels.includes(w.level)) return false;
     if(units.length && !units.includes(w.unit)) return false;
@@ -254,7 +383,6 @@ function parseManualWords(){
   const manual = document.getElementById("manualWords").value.trim();
   const out = [];
   if(!manual) return out;
-
   manual.split("\n").forEach(line => {
     const t = line.trim();
     if(!t) return;
@@ -267,7 +395,6 @@ function parseManualWords(){
 }
 
 function quizNoNext(){
-  // daily running number
   const d = new Date();
   const y = d.getFullYear();
   const m = String(d.getMonth()+1).padStart(2,"0");
@@ -289,10 +416,7 @@ function createQuiz(){
   const count = parseInt(document.getElementById("questionCount").value, 10);
   const prevent = document.getElementById("preventRepeat").checked;
 
-  if(selected.length === 0){
-    alert("En az 1 öğrenci seç.");
-    return;
-  }
+  if(selected.length === 0){ alert("En az 1 öğrenci seç."); return; }
 
   let pool = [...getWordPool(), ...parseManualWords()];
   pool = shuffle(pool);
@@ -300,7 +424,11 @@ function createQuiz(){
   const output = document.getElementById("quizOutput");
   output.innerHTML = "";
 
-  selected.forEach((student, idx) => {
+  const today = new Date().toLocaleDateString("tr-TR");
+  const levelText = [...document.querySelectorAll(".level:checked")].map(x=>x.value).join(", ") || "-";
+  const unitText  = [...document.querySelectorAll(".unit:checked")].map(x=>x.value).join(", ") || "-";
+
+  selected.forEach((student) => {
     const usedKey = "usedWords::" + student.id;
     const used = new Set(JSON.parse(localStorage.getItem(usedKey) || "[]"));
 
@@ -308,49 +436,86 @@ function createQuiz(){
 
     let q = 0;
     const pickedIds = [];
-    const lines = [];
+    const items = [];
 
     for(const w of pool){
       const wid = `${w.grade ?? ""}|${w.en}|${w.unit ?? ""}|${w.level ?? ""}`;
       if(prevent && used.has(wid)) continue;
-      if(pickedIds.includes(wid)) continue; // same quiz repeat guard
-
+      if(pickedIds.includes(wid)) continue;
       pickedIds.push(wid);
-      lines.push(`${q+1}) ${w.en} ______________________________`);
+      items.push({n:q+1, en:w.en});
       q++;
       if(q >= count) break;
     }
 
-    // save used
     const newUsed = new Set([...used, ...pickedIds]);
     localStorage.setItem(usedKey, JSON.stringify(Array.from(newUsed)));
 
     const page = document.createElement("div");
     page.className = "quizPage";
 
-    const today = new Date().toLocaleDateString("tr-TR");
-    const levelText = [...document.querySelectorAll(".level:checked")].map(x=>x.value).join(", ") || "-";
-    const unitText  = [...document.querySelectorAll(".unit:checked")].map(x=>x.value).join(", ") || "-";
+    // Keep on one page: switch to 2 columns from 15 questions upward
+    const twoCol = (count >= 15);
 
     page.innerHTML = `
       <div class="quizHeader">
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div class="top">
           <div><b>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</b></div>
           <div><b>QUIZ NO:</b> ${escapeHtml(quizNo)}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;">
+        <div class="meta">
           <div><b>Öğrenci:</b> ${escapeHtml(student.name)} ${student.numara ? `<span class="small">(No: ${escapeHtml(student.numara)})</span>` : ""}</div>
           <div><b>Sınıf:</b> ${escapeHtml(student.classKey || document.getElementById("grade").value)}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px;">
+        <div class="meta">
           <div><b>Kaynak:</b> Level: ${escapeHtml(levelText)} | Unit: ${escapeHtml(unitText)}</div>
           <div><b>Tarih:</b> ${escapeHtml(today)} &nbsp; <b>Sayfa:</b> 1 / 1</div>
         </div>
       </div>
-      ${lines.length ? lines.map(t=>`<div class="question">${escapeHtml(t)}</div>`).join("") : "<div style='color:#b00020;'>Bu filtrelerde kullanılmamış kelime kalmadı. Filtreyi genişlet veya öğrencinin geçmişini sıfırla.</div>"}
+
+      <div class="questions ${twoCol ? "twoCol" : ""}">
+        ${items.length ? items.map(it => `
+          <div class="question">
+            <div class="questionLine">
+              <div class="qNo">${it.n})</div>
+              <div class="qText">${escapeHtml(it.en)}</div>
+              <span class="blank"></span>
+            </div>
+          </div>
+        `).join("") : "<div style='color:#b00020;'>Bu filtrelerde kullanılmamış kelime kalmadı. Filtreyi genişlet veya öğrencinin geçmişini sıfırla.</div>"}
+      </div>
     `;
 
     output.appendChild(page);
+  });
+}
+
+/* Dropdown open/close */
+const btn = document.getElementById("studentDropdownBtn");
+const menu = document.getElementById("studentDropdownMenu");
+
+btn.addEventListener("click", () => {
+  menu.classList.toggle("open");
+  if(menu.classList.contains("open")) document.getElementById("studentSearch").focus();
+});
+
+function closeStudentMenu(){ menu.classList.remove("open"); }
+
+document.addEventListener("click", (e) => {
+  if(!menu.classList.contains("open")) return;
+  const within = e.target.closest(".dropdown");
+  if(!within) menu.classList.remove("open");
+});
+
+/* Search */
+const searchInput = document.getElementById("studentSearch");
+searchInput.addEventListener("input", applyStudentSearch);
+
+function applyStudentSearch(){
+  const q = (searchInput.value || "").toLowerCase().trim();
+  document.querySelectorAll("#studentList .studentItem").forEach(item => {
+    const t = item.textContent.toLowerCase();
+    item.style.display = (!q || t.includes(q)) ? "" : "none";
   });
 }
 
