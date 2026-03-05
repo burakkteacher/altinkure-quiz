@@ -6,378 +6,359 @@
 <title>Altınküre Vocabulary Quiz</title>
 
 <style>
-body{
-font-family: Arial, sans-serif;
-background:#f4f6f8;
-margin:0;
-}
-
-header{
-background:#1f3a5f;
-color:white;
-padding:15px;
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-header img{
-height:50px;
-}
-
-header h1{
-font-size:18px;
-margin:0;
-}
-
-.container{
-display:grid;
-grid-template-columns:320px 1fr;
-gap:20px;
-padding:20px;
-}
-
-.card{
-background:white;
-padding:15px;
-border-radius:8px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-margin-bottom:15px;
-}
-
-.card h3{
-margin-top:0;
-}
-
-button{
-background:#1f3a5f;
-color:white;
-border:none;
-padding:10px 15px;
-border-radius:5px;
-cursor:pointer;
-margin-top:5px;
-}
-
-button:hover{
-background:#2d5285;
-}
-
-textarea{
-width:100%;
-height:120px;
-}
-
-#quizOutput{
-background:white;
-padding:20px;
-border-radius:8px;
-}
-
-.quizPage{
-page-break-after:always;
-margin-bottom:30px;
-}
-
-.quizHeader{
-border-bottom:2px solid #000;
-margin-bottom:15px;
-padding-bottom:10px;
-}
-
-.question{
-margin:10px 0;
-}
-
-.studentItem{
-margin-bottom:5px;
-}
-
-.unitList{
-max-height:120px;
-overflow:auto;
-border:1px solid #ddd;
-padding:5px;
-}
-
+body{font-family: Arial, sans-serif;background:#f4f6f8;margin:0;}
+header{background:#1f3a5f;color:white;padding:15px;display:flex;align-items:center;gap:15px;}
+header img{height:50px;}
+header h1{font-size:18px;margin:0;}
+.container{display:grid;grid-template-columns:320px 1fr;gap:20px;padding:20px;}
+.card{background:white;padding:15px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin-bottom:15px;}
+.card h3{margin-top:0;}
+button{background:#1f3a5f;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;margin-top:5px;}
+button:hover{background:#2d5285;}
+textarea{width:100%;height:120px;}
+#quizOutput{background:white;padding:20px;border-radius:8px;}
+.quizPage{page-break-after:always;margin-bottom:30px;}
+.quizHeader{border-bottom:2px solid #000;margin-bottom:15px;padding-bottom:10px;line-height:1.35;}
+.question{margin:10px 0;}
+.studentItem{margin-bottom:6px;}
+.unitList{max-height:120px;overflow:auto;border:1px solid #ddd;padding:5px;border-radius:6px;}
+.small{font-size:12px;color:#666;}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 @media print{
-
-body{background:white;}
-.container{display:block;}
-.card{display:none;}
-header{display:none;}
-
+  body{background:white;}
+  .container{display:block;}
+  .card{display:none;}
+  header{display:none;}
 }
 </style>
-
 </head>
 
 <body>
-
 <header>
-<img src="logo.png">
-<h1>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</h1>
+  <img src="logo.png" alt="logo">
+  <h1>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</h1>
 </header>
 
 <div class="container">
+  <div>
+    <div class="card">
+      <h3>Sınıf</h3>
+      <select id="grade">
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+      </select>
+      <div class="small" style="margin-top:6px;">Öğrenciler students.json içinden yüklenir.</div>
+    </div>
 
-<div>
+    <div class="card">
+      <h3>Öğrenciler</h3>
+      <div class="row" style="margin-bottom:8px;">
+        <button type="button" onclick="selectAllStudents(true)">Hepsini seç</button>
+        <button type="button" onclick="selectAllStudents(false)">Seçimi temizle</button>
+      </div>
+      <div id="studentList"></div>
+    </div>
 
-<div class="card">
-<h3>Sınıf</h3>
-<select id="grade">
-<option value="5">5</option>
-<option value="6">6</option>
-<option value="7">7</option>
-<option value="8">8</option>
-</select>
-</div>
+    <div class="card">
+      <h3>Level</h3>
+      <label><input type="checkbox" value="Pre-A1" class="level"> Pre-A1</label><br>
+      <label><input type="checkbox" value="A1" class="level"> A1</label><br>
+      <label><input type="checkbox" value="A2" class="level"> A2</label><br>
+      <label><input type="checkbox" value="B1" class="level"> B1</label><br>
+      <label><input type="checkbox" value="B2" class="level"> B2</label>
+    </div>
 
-<div class="card">
-<h3>Öğrenciler</h3>
-<div id="studentList"></div>
-</div>
+    <div class="card">
+      <h3>Üniteler</h3>
+      <div id="unitList" class="unitList"></div>
+    </div>
 
-<div class="card">
-<h3>Level</h3>
-<label><input type="checkbox" value="Pre-A1" class="level"> Pre-A1</label><br>
-<label><input type="checkbox" value="A1" class="level"> A1</label><br>
-<label><input type="checkbox" value="A2" class="level"> A2</label><br>
-<label><input type="checkbox" value="B1" class="level"> B1</label><br>
-<label><input type="checkbox" value="B2" class="level"> B2</label>
-</div>
+    <div class="card">
+      <h3>Manuel Kelime</h3>
+      <div class="small">Excel’den TAB ile yapıştır: <b>EN[TAB]TR</b></div>
+      <textarea id="manualWords" placeholder="apple	elma"></textarea>
+    </div>
 
-<div class="card">
-<h3>Üniteler</h3>
-<div id="unitList" class="unitList"></div>
-</div>
+    <div class="card">
+      <h3>Quiz Ayarı</h3>
+      <div class="row">
+        <label>Soru Sayısı:
+          <select id="questionCount">
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+            <option value="25">25</option>
+          </select>
+        </label>
+      </div>
 
-<div class="card">
-<h3>Manuel Kelime</h3>
-<textarea id="manualWords" placeholder="apple	elma"></textarea>
-</div>
+      <div style="margin-top:8px;">
+        <label><input type="checkbox" id="preventRepeat" checked> Öğrenci için tekrar etmesin</label>
+      </div>
 
-<div class="card">
-<h3>Quiz Ayarı</h3>
+      <div class="row" style="margin-top:10px;">
+        <button type="button" onclick="createQuiz()">QUIZ OLUŞTUR</button>
+        <button type="button" onclick="window.print()">YAZDIR</button>
+      </div>
 
-<select id="questionCount">
-<option value="10">10</option>
-<option value="15">15</option>
-<option value="20">20</option>
-<option value="25">25</option>
-</select>
+      <div class="small" style="margin-top:10px;">
+        Not: words.json yoksa sadece manuel kelimelerle quiz üretir.
+      </div>
+    </div>
+  </div>
 
-<br>
-
-<label>
-<input type="checkbox" id="preventRepeat" checked>
-Öğrenci için tekrar etmesin
-</label>
-
-<br>
-
-<button onclick="createQuiz()">QUIZ OLUŞTUR</button>
-<button onclick="window.print()">YAZDIR</button>
-
-</div>
-
-</div>
-
-<div id="quizOutput"></div>
-
+  <div id="quizOutput"></div>
 </div>
 
 <script>
-
-let students=[]
-let words=[]
+let STUDENTS_RAW = null;
+let words = [];
 
 fetch("students.json")
-.then(r=>r.json())
-.then(data=>{
-students=data
-loadStudents()
-})
+  .then(r => r.json())
+  .then(data => { STUDENTS_RAW = data; loadStudents(); })
+  .catch(err => {
+    console.log("students.json okunamadı", err);
+    document.getElementById("studentList").innerHTML =
+      "<div style='color:#b00020;'>students.json okunamadı. Dosya aynı klasörde mi?</div>";
+  });
 
 fetch("words.json")
-.then(r=>r.json())
-.then(data=>{
-words=data
-loadUnits()
-})
-.catch(()=>{
-console.log("words.json yok")
-})
+  .then(r => r.json())
+  .then(data => { words = Array.isArray(data) ? data : (data.words || []); loadUnits(); })
+  .catch(()=>{ console.log("words.json yok"); });
 
-function loadStudents(){
+function normalizeStudentsFromJson(raw){
+  // Supports two formats:
+  // 1) Array of {Sube, Adi, Numara?}
+  // 2) Object {classes: {"7-B":[{numara,name}, ...]}, grades:{...}}
+  const result = [];
+  if(!raw) return result;
 
-let grade=document.getElementById("grade").value
-let list=document.getElementById("studentList")
-list.innerHTML=""
+  if(Array.isArray(raw)){
+    raw.forEach(s => {
+      const cls = s.Sube || s.sube || s.class || s.sinif || "";
+      const name = s.Adi || s.name || s.ad || "";
+      const num = s.Numara || s.numara || s.no || "";
+      if(name) result.push({classKey: String(cls), name: String(name), numara: String(num)});
+    });
+    return result;
+  }
 
-students
-.filter(s=>s.Sube.startsWith(grade))
-.forEach(s=>{
+  if(raw.classes && typeof raw.classes === "object"){
+    Object.keys(raw.classes).forEach(classKey => {
+      const arr = raw.classes[classKey] || [];
+      arr.forEach(st => {
+        const name = st.name || st.Adi || st.ad || "";
+        const num = st.numara || st.Numara || st.no || "";
+        if(name) result.push({classKey, name: String(name), numara: String(num)});
+      });
+    });
+  }
 
-let div=document.createElement("div")
-div.className="studentItem"
-
-div.innerHTML=`
-<label>
-<input type="checkbox" value="${s.Adi}">
-${s.Adi}
-</label>
-`
-
-list.appendChild(div)
-
-})
-
+  return result;
 }
 
-document.getElementById("grade").addEventListener("change",loadStudents)
+function loadStudents(){
+  const grade = document.getElementById("grade").value;
+  const list = document.getElementById("studentList");
+  list.innerHTML = "";
+
+  const all = normalizeStudentsFromJson(STUDENTS_RAW)
+    .filter(s => (s.classKey || "").startsWith(grade + "-"));
+
+  if(all.length === 0){
+    list.innerHTML = "<div style='color:#b00020;'>Bu sınıfta öğrenci bulunamadı. students.json formatını kontrol et.</div>";
+    return;
+  }
+
+  // Sort by class then numara then name
+  all.sort((a,b)=>{
+    if(a.classKey !== b.classKey) return a.classKey.localeCompare(b.classKey, "tr");
+    const na = parseInt(a.numara || "0", 10), nb = parseInt(b.numara || "0", 10);
+    if(na !== nb) return na - nb;
+    return a.name.localeCompare(b.name, "tr");
+  });
+
+  all.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "studentItem";
+
+    const studentId = `${s.classKey}::${s.numara || s.name}`;
+    div.innerHTML = `
+      <label>
+        <input type="checkbox" data-student-id="${escapeHtml(studentId)}" data-student-class="${escapeHtml(s.classKey)}" data-student-num="${escapeHtml(s.numara||"")}" value="${escapeHtml(s.name)}">
+        <b>${escapeHtml(s.name)}</b>
+        <span class="small">(${escapeHtml(s.classKey)}${s.numara ? " • No: "+escapeHtml(s.numara) : ""})</span>
+      </label>
+    `;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById("grade").addEventListener("change", loadStudents);
+
+function selectAllStudents(flag){
+  document.querySelectorAll("#studentList input[type=checkbox]").forEach(cb => cb.checked = !!flag);
+}
 
 function loadUnits(){
+  const unitSet = new Set();
+  words.forEach(w => { if(w.unit) unitSet.add(w.unit); });
 
-let unitSet=new Set()
+  const container = document.getElementById("unitList");
+  container.innerHTML = "";
 
-words.forEach(w=>{
-if(w.unit) unitSet.add(w.unit)
-})
+  if(unitSet.size === 0){
+    container.innerHTML = "<div class='small'>words.json yüklenince üniteler burada listelenir.</div>";
+    return;
+  }
 
-let container=document.getElementById("unitList")
-
-unitSet.forEach(u=>{
-
-let div=document.createElement("div")
-
-div.innerHTML=`
-<label>
-<input type="checkbox" value="${u}" class="unit">
-${u}
-</label>
-`
-
-container.appendChild(div)
-
-})
-
+  Array.from(unitSet).sort((a,b)=>String(a).localeCompare(String(b),"tr")).forEach(u => {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <label><input type="checkbox" value="${escapeHtml(u)}" class="unit"> ${escapeHtml(u)}</label>
+    `;
+    container.appendChild(div);
+  });
 }
 
 function getWordPool(){
+  const grade = document.getElementById("grade").value;
+  const levels = [...document.querySelectorAll(".level:checked")].map(x=>x.value);
+  const units  = [...document.querySelectorAll(".unit:checked")].map(x=>x.value);
 
-let grade=document.getElementById("grade").value
+  let pool = words.filter(w => {
+    // grade can be number or string in words.json
+    if(w.grade != null && String(w.grade) !== String(grade)) return false;
+    if(levels.length && !levels.includes(w.level)) return false;
+    if(units.length && !units.includes(w.unit)) return false;
+    return true;
+  });
 
-let levels=[...document.querySelectorAll(".level:checked")].map(x=>x.value)
-let units=[...document.querySelectorAll(".unit:checked")].map(x=>x.value)
-
-let pool=words.filter(w=>{
-
-if(w.grade && w.grade!=grade) return false
-
-if(levels.length && !levels.includes(w.level)) return false
-
-if(units.length && !units.includes(w.unit)) return false
-
-return true
-
-})
-
-return pool
-
+  return pool;
 }
 
 function shuffle(arr){
-return arr.sort(()=>Math.random()-0.5)
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function parseManualWords(){
+  const manual = document.getElementById("manualWords").value.trim();
+  const out = [];
+  if(!manual) return out;
+
+  manual.split("\n").forEach(line => {
+    const t = line.trim();
+    if(!t) return;
+    const p = t.split("\t");
+    const en = (p[0]||"").trim();
+    const tr = (p[1]||"").trim();
+    if(en) out.push({en, tr, grade:null, level:null, unit:null, _manual:true});
+  });
+  return out;
+}
+
+function quizNoNext(){
+  // daily running number
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  const key = `quizCounter_${y}${m}${day}`;
+  let n = parseInt(localStorage.getItem(key) || "0", 10) + 1;
+  localStorage.setItem(key, String(n));
+  return `${y}${m}${day}-${String(n).padStart(3,"0")}`;
 }
 
 function createQuiz(){
+  const selected = [...document.querySelectorAll("#studentList input:checked")].map(cb => ({
+    name: cb.value,
+    id: cb.getAttribute("data-student-id") || cb.value,
+    classKey: cb.getAttribute("data-student-class") || "",
+    numara: cb.getAttribute("data-student-num") || ""
+  }));
 
-let selectedStudents=[...document.querySelectorAll("#studentList input:checked")]
-.map(x=>x.value)
+  const count = parseInt(document.getElementById("questionCount").value, 10);
+  const prevent = document.getElementById("preventRepeat").checked;
 
-let manual=document.getElementById("manualWords").value.trim()
+  if(selected.length === 0){
+    alert("En az 1 öğrenci seç.");
+    return;
+  }
 
-let manualWords=[]
+  let pool = [...getWordPool(), ...parseManualWords()];
+  pool = shuffle(pool);
 
-if(manual){
+  const output = document.getElementById("quizOutput");
+  output.innerHTML = "";
 
-manual.split("\\n").forEach(line=>{
+  selected.forEach((student, idx) => {
+    const usedKey = "usedWords::" + student.id;
+    const used = new Set(JSON.parse(localStorage.getItem(usedKey) || "[]"));
 
-let p=line.split("\\t")
+    const quizNo = quizNoNext();
 
-manualWords.push({en:p[0],tr:p[1]})
+    let q = 0;
+    const pickedIds = [];
+    const lines = [];
 
-})
+    for(const w of pool){
+      const wid = `${w.grade ?? ""}|${w.en}|${w.unit ?? ""}|${w.level ?? ""}`;
+      if(prevent && used.has(wid)) continue;
+      if(pickedIds.includes(wid)) continue; // same quiz repeat guard
 
+      pickedIds.push(wid);
+      lines.push(`${q+1}) ${w.en} ______________________________`);
+      q++;
+      if(q >= count) break;
+    }
+
+    // save used
+    const newUsed = new Set([...used, ...pickedIds]);
+    localStorage.setItem(usedKey, JSON.stringify(Array.from(newUsed)));
+
+    const page = document.createElement("div");
+    page.className = "quizPage";
+
+    const today = new Date().toLocaleDateString("tr-TR");
+    const levelText = [...document.querySelectorAll(".level:checked")].map(x=>x.value).join(", ") || "-";
+    const unitText  = [...document.querySelectorAll(".unit:checked")].map(x=>x.value).join(", ") || "-";
+
+    page.innerHTML = `
+      <div class="quizHeader">
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div><b>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</b></div>
+          <div><b>QUIZ NO:</b> ${escapeHtml(quizNo)}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px;">
+          <div><b>Öğrenci:</b> ${escapeHtml(student.name)} ${student.numara ? `<span class="small">(No: ${escapeHtml(student.numara)})</span>` : ""}</div>
+          <div><b>Sınıf:</b> ${escapeHtml(student.classKey || document.getElementById("grade").value)}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:4px;">
+          <div><b>Kaynak:</b> Level: ${escapeHtml(levelText)} | Unit: ${escapeHtml(unitText)}</div>
+          <div><b>Tarih:</b> ${escapeHtml(today)} &nbsp; <b>Sayfa:</b> 1 / 1</div>
+        </div>
+      </div>
+      ${lines.length ? lines.map(t=>`<div class="question">${escapeHtml(t)}</div>`).join("") : "<div style='color:#b00020;'>Bu filtrelerde kullanılmamış kelime kalmadı. Filtreyi genişlet veya öğrencinin geçmişini sıfırla.</div>"}
+    `;
+
+    output.appendChild(page);
+  });
 }
 
-let pool=getWordPool()
-
-pool=[...pool,...manualWords]
-
-pool=shuffle(pool)
-
-let count=parseInt(document.getElementById("questionCount").value)
-
-let output=document.getElementById("quizOutput")
-output.innerHTML=""
-
-selectedStudents.forEach((student,i)=>{
-
-let usedKey="used_"+student
-let used=JSON.parse(localStorage.getItem(usedKey) || "[]")
-
-let page=document.createElement("div")
-page.className="quizPage"
-
-let header=`
-<div class="quizHeader">
-<b>ALTINKÜRE YABANCI DİLLER KOORDİNATÖRLÜĞÜ</b><br>
-Quiz No: ${Date.now()}-${i+1}<br>
-Öğrenci: ${student}<br>
-Tarih: ${new Date().toLocaleDateString()}<br>
-Sayfa: 1 / 1
-</div>
-`
-
-let questions=""
-let q=0
-let newUsed=[...used]
-
-for(let w of pool){
-
-let id=w.en
-
-if(document.getElementById("preventRepeat").checked){
-if(used.includes(id)) continue
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[s]));
 }
-
-questions+=`
-<div class="question">
-${q+1}) ${w.en} ______________________________
-</div>
-`
-
-newUsed.push(id)
-
-q++
-
-if(q>=count) break
-
-}
-
-localStorage.setItem(usedKey,JSON.stringify(newUsed))
-
-page.innerHTML=header+questions
-
-output.appendChild(page)
-
-})
-
-}
-
 </script>
-
 </body>
 </html>
