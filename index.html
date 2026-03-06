@@ -9,7 +9,7 @@ body{font-family:Arial,sans-serif;background:#f4f6f8;margin:0}
 header{background:#1f3a5f;color:white;padding:15px;display:flex;align-items:center;gap:15px}
 header img{height:50px}
 header h1{font-size:18px;margin:0}
-.container{display:grid;grid-template-columns:340px 1fr;gap:20px;padding:20px}
+.container{display:grid;grid-template-columns:360px 1fr;gap:20px;padding:20px}
 .card{background:white;padding:15px;border-radius:8px;box-shadow:0 2px 5px rgba(0,0,0,.1);margin-bottom:15px}
 .card h3{margin-top:0}
 button{background:#1f3a5f;color:white;border:none;padding:10px 15px;border-radius:5px;cursor:pointer;margin-top:5px}
@@ -21,7 +21,7 @@ textarea{width:100%;height:120px}
 .quizPage{page-break-after:always;margin-bottom:30px}
 .quizHeader{border-bottom:2px solid #000;margin-bottom:15px;padding-bottom:10px;line-height:1.5}
 .quizHeader h2{margin:0;font-size:16px}
-.question{margin:10px 0}
+.question{margin:12px 0}
 .studentItem,.wordItem{margin-bottom:6px}
 .small{font-size:12px;color:#666}
 .row{display:flex;gap:8px;flex-wrap:wrap}
@@ -30,6 +30,10 @@ textarea{width:100%;height:120px}
 .studentBox{max-height:260px;overflow:auto;border:1px solid #ddd;border-radius:6px;padding:10px;background:#fafbfc}
 .countBox{font-size:13px;color:#1f3a5f;font-weight:700;margin-top:8px}
 label.inline{display:flex;align-items:center;gap:6px}
+.modeBox{display:grid;gap:6px}
+.optionLine{display:flex;align-items:center;gap:8px;margin:5px 0}
+.mc-options{margin-left:24px;display:grid;gap:4px}
+.answerLine{margin-top:14px}
 @media print{
   body{background:white}
   .container{display:block}
@@ -72,7 +76,12 @@ label.inline{display:flex;align-items:center;gap:6px}
 
     <div class="card">
       <h3>Kelime Kaynağı</h3>
-      <div class="small">Aşağıdaki seviyelerden kelimeler çekilir.</div>
+      <div class="modeBox">
+        <label class="inline"><input type="radio" name="sourceMode" value="levels" checked> Sadece A1 / A2 / B1 / B2</label>
+        <label class="inline"><input type="radio" name="sourceMode" value="manual"> Sadece manuel kelime</label>
+        <label class="inline"><input type="radio" name="sourceMode" value="both"> Manuel + A1 / A2 / B1 / B2 birlikte</label>
+      </div>
+      <div class="small" style="margin-top:8px">Seçime göre havuz oluşur.</div>
       <div class="row" style="margin-top:10px">
         <label class="inline"><input type="checkbox" class="levelChk" value="A1" checked> A1</label>
         <label class="inline"><input type="checkbox" class="levelChk" value="A2" checked> A2</label>
@@ -86,14 +95,21 @@ label.inline{display:flex;align-items:center;gap:6px}
     </div>
 
     <div class="card">
-      <h3>Manuel Kelime (opsiyonel)</h3>
-      <textarea id="manualWords" placeholder="apple	elma"></textarea>
-      <div class="small">Buraya yazarsan sadece bunlardan quiz oluşur.</div>
+      <h3>Manuel Kelime</h3>
+      <textarea id="manualWords" placeholder="apple	elma&#10;book	kitap"></textarea>
+      <div class="small">Her satır: İngilizce TAB Türkçe</div>
     </div>
 
     <div class="card">
       <h3>Quiz Ayarı</h3>
-      <label for="questionCount">Soru sayısı</label>
+      <label for="quizType">Quiz türü</label>
+      <select id="quizType">
+        <option value="en-tr">İngilizce → Türkçe</option>
+        <option value="tr-en">Türkçe → İngilizce</option>
+        <option value="spelling">Spelling Quiz</option>
+        <option value="mixed">Karışık</option>
+      </select>
+      <label for="questionCount" style="display:block;margin-top:10px;">Soru sayısı</label>
       <select id="questionCount">
         <option value="10">10</option>
         <option value="15">15</option>
@@ -129,6 +145,8 @@ document.getElementById("grade").addEventListener("change", loadStudents);
 document.getElementById("studentSearch").addEventListener("input", loadStudents);
 document.getElementById("wordSearch").addEventListener("input", renderWords);
 document.querySelectorAll(".levelChk").forEach(chk=>chk.addEventListener("change", loadWords));
+document.querySelectorAll("input[name='sourceMode']").forEach(r=>r.addEventListener("change", renderWords));
+document.getElementById("manualWords").addEventListener("input", renderWords);
 document.getElementById("selectAllStudents").addEventListener("click", ()=>{
   document.querySelectorAll("#studentList input[type='checkbox']").forEach(x=>x.checked=true);
   updateStudentCount();
@@ -190,6 +208,24 @@ function updateStudentCount(){
     document.querySelectorAll("#studentList input:checked").length;
 }
 
+function parseManualWords(){
+  const manual = document.getElementById("manualWords").value.trim();
+  if(!manual) return [];
+  return manual.split("\n").map(line=>{
+    const parts = line.split("\t");
+    return {
+      en:(parts[0]||"").trim(),
+      tr:(parts[1]||"").trim(),
+      pos:"",
+      level:"MANUAL"
+    };
+  }).filter(x=>x.en);
+}
+
+function currentSourceMode(){
+  return document.querySelector("input[name='sourceMode']:checked").value;
+}
+
 async function loadWords(){
   const selectedLevels = [...document.querySelectorAll(".levelChk:checked")].map(x=>x.value);
   allWords = [];
@@ -221,13 +257,34 @@ async function loadWords(){
   renderWords();
 }
 
-function renderWords(){
+function effectiveWordPool(){
+  const mode = currentSourceMode();
+  const manual = parseManualWords();
+
+  let pool = [];
+  if(mode === "levels") pool = [...allWords];
+  if(mode === "manual") pool = [...manual];
+  if(mode === "both") pool = [...allWords, ...manual];
+
   const q = document.getElementById("wordSearch").value.trim().toLowerCase();
-  filteredWords = allWords.filter(w => {
+
+  const seen = new Set();
+  const uniquePool = pool.filter(w=>{
+    const key = (w.en || "").toLowerCase();
+    if(!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  return uniquePool.filter(w => {
     const en = (w.en || "").toLowerCase();
     const tr = (w.tr || "").toLowerCase();
     return !q || en.includes(q) || tr.includes(q);
   });
+}
+
+function renderWords(){
+  filteredWords = effectiveWordPool();
 
   const box = document.getElementById("wordList");
   box.innerHTML = "";
@@ -253,20 +310,79 @@ function renderWords(){
 }
 
 function pickWords(count){
-  const manual = document.getElementById("manualWords").value.trim();
-  if(manual){
-    return manual.split("\n").map(line=>{
-      const parts = line.split("\t");
-      return {en:(parts[0]||"").trim(), tr:(parts[1]||"").trim()};
-    }).filter(x=>x.en).slice(0, count);
-  }
-
   const pool = [...filteredWords];
   for(let i=pool.length-1;i>0;i--){
     const j = Math.floor(Math.random()*(i+1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
   return pool.slice(0, count).map(w=>({en:w.en||"", tr:w.tr||""}));
+}
+
+function randChoice(arr){
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function buildWrongOptions(correctValue, field){
+  const pool = filteredWords
+    .map(w => field === "en" ? w.en : w.tr)
+    .filter(v => v && v !== correctValue);
+  const uniq = [...new Set(pool)];
+  for(let i=uniq.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [uniq[i], uniq[j]] = [uniq[j], uniq[i]];
+  }
+  return uniq.slice(0, 3);
+}
+
+function createQuestion(word, index, type){
+  if(type === "mixed"){
+    const types = ["en-tr","tr-en","spelling"];
+    type = randChoice(types);
+  }
+
+  if(type === "en-tr"){
+    const correct = word.tr || "........";
+    const options = [correct, ...buildWrongOptions(correct, "tr")].filter(Boolean).slice(0,4);
+    while(options.length < 4) options.push("........");
+    shuffle(options);
+    return `
+      <div class="question">
+        ${index}) <b>${escapeHtml(word.en)}</b> ne demek?<br>
+        <div class="mc-options">
+          A) ${escapeHtml(options[0])}<br>
+          B) ${escapeHtml(options[1])}<br>
+          C) ${escapeHtml(options[2])}<br>
+          D) ${escapeHtml(options[3])}
+        </div>
+      </div>
+    `;
+  }
+
+  if(type === "tr-en"){
+    const correct = word.en || "........";
+    const prompt = word.tr || "........";
+    const options = [correct, ...buildWrongOptions(correct, "en")].filter(Boolean).slice(0,4);
+    while(options.length < 4) options.push("........");
+    shuffle(options);
+    return `
+      <div class="question">
+        ${index}) <b>${escapeHtml(prompt)}</b> nedir?<br>
+        <div class="mc-options">
+          A) ${escapeHtml(options[0])}<br>
+          B) ${escapeHtml(options[1])}<br>
+          C) ${escapeHtml(options[2])}<br>
+          D) ${escapeHtml(options[3])}
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="question">
+      ${index}) Türkçesi: <b>${escapeHtml(word.tr || "........")}</b><br>
+      İngilizcesini yazınız: ______________________________
+    </div>
+  `;
 }
 
 function createQuiz(){
@@ -276,11 +392,17 @@ function createQuiz(){
     no: x.dataset.no || ""
   }));
   const count = parseInt(document.getElementById("questionCount").value, 10);
+  const quizType = document.getElementById("quizType").value;
   const output = document.getElementById("quizOutput");
   output.innerHTML = "";
 
   if(selectedStudents.length === 0){
     output.innerHTML = "<p>Lütfen en az bir öğrenci seç.</p>";
+    return;
+  }
+
+  if(filteredWords.length === 0){
+    output.innerHTML = "<p>Kelime havuzu boş. Seviye seç veya manuel kelime gir.</p>";
     return;
   }
 
@@ -291,7 +413,7 @@ function createQuiz(){
 
     let questions = "";
     selected.forEach((w, idx)=>{
-      questions += `<div class="question">${idx+1}) ${escapeHtml(w.en)} ______________________________</div>`;
+      questions += createQuestion(w, idx+1, quizType);
     });
 
     page.innerHTML = `
@@ -300,6 +422,7 @@ function createQuiz(){
         Quiz No: ${Date.now()}-${i+1}<br>
         Öğrenci: ${escapeHtml(student.name)}<br>
         Sınıf: ${escapeHtml(student.cls)}${student.no ? " • No: " + escapeHtml(student.no) : ""}<br>
+        Quiz Türü: ${escapeHtml(document.getElementById("quizType").selectedOptions[0].textContent)}<br>
         Tarih: ${new Date().toLocaleDateString("tr-TR")}<br>
         Sayfa: 1 / 1
       </div>
@@ -307,6 +430,13 @@ function createQuiz(){
     `;
     output.appendChild(page);
   });
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
 }
 
 function escapeHtml(str){
